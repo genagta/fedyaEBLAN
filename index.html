@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Рофл сайт</title>
+    <style>
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; font-family: 'Arial', sans-serif; overflow: hidden; }
+        body { background: linear-gradient(45deg, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #8b00ff); background-size: 400% 400%; animation: rainbow-animation 10s ease infinite; cursor: pointer; }
+        @keyframes rainbow-animation { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+        .welcome-text { position: absolute; text-align: center; color: white; text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.5); transition: opacity 0.5s ease; user-select: none; }
+        #tg-button { display: none; padding: 15px 30px; font-size: 1.2rem; background-color: white; color: black; border: none; border-radius: 50px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 15px rgba(0,0,0,0.3); transition: transform 0.2s; z-index: 10; }
+        #tg-button:hover { transform: scale(1.1); }
+        .hidden { opacity: 0; pointer-events: none; }
+    </style>
+</head>
+<body id="main-body" onclick="showButton()">
+    <div class="welcome-text" id="main-text">
+        <h1>Добро пожаловать на рофл сайт</h1>
+        <p>(федя нищий кстати)</p>
+    </div>
+    <button id="tg-button" onclick="rickroll(event)">мой тг</button>
+    <script>
+        function showButton() {
+            const text = document.getElementById('main-text');
+            text.classList.add('hidden');
+            setTimeout(() => {
+                const btn = document.getElementById('tg-button');
+                btn.style.display = 'block';
+                document.getElementById('main-body').onclick = null;
+                document.body.style.cursor = 'default';
+            }, 500);
+        }
+        function rickroll(event) {
+            event.stopPropagation();
+            window.location.href = "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
+        }
+    </script>
+</body>
+</html>
