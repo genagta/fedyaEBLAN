@@ -2,38 +2,277 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Рофл сайт</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Рофл сайт 2.0</title>
     <style>
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; font-family: 'Arial', sans-serif; overflow: hidden; }
-        body { background: linear-gradient(45deg, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #8b00ff); background-size: 400% 400%; animation: rainbow-animation 10s ease infinite; cursor: pointer; }
-        @keyframes rainbow-animation { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
-        .welcome-text { position: absolute; text-align: center; color: white; text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.5); transition: opacity 0.5s ease; user-select: none; }
-        #tg-button { display: none; padding: 15px 30px; font-size: 1.2rem; background-color: white; color: black; border: none; border-radius: 50px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 15px rgba(0,0,0,0.3); transition: transform 0.2s; z-index: 10; }
-        #tg-button:hover { transform: scale(1.1); }
+        body, html {
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            display: flex; justify-content: center; align-items: center;
+            font-family: 'Arial', sans-serif; overflow: hidden;
+            touch-action: manipulation;
+        }
+
+        /* --- СТИЛИ ДЛЯ ФОНОВ --- */
+        
+        /* Класс для радужного фона (по умолчанию) */
+        body.bg-rainbow {
+            background: linear-gradient(45deg, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #8b00ff);
+            background-size: 400% 400%;
+            animation: rainbow-animation 10s ease infinite;
+        }
+
+        /* Класс для фона с Федей */
+        body.bg-fedya {
+            background-image: url('IMG_6374.jpeg'); /* Убедись, что файл называется так и лежит на GitHub */
+            background-size: contain; /* Картинка полностью влезает на экран */
+            background-position: center top; /* Федя смотрит прямо в душу, выровнен по центру */
+            background-repeat: no-repeat; /* Не повторяется */
+            background-color: rgb(0, 255, 0); /* Зеленый фон вокруг, если экран больше картинки */
+        }
+
+        @keyframes rainbow-animation {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* --- ОСТАЛЬНЫЕ СТИЛИ --- */
+
+        #main-text {
+            text-align: center; color: white;
+            text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.5);
+            transition: opacity 0.5s ease;
+            user-select: none; pointer-events: none;
+        }
+
+        #menu, #rules-screen, #settings-panel { 
+            display: none; flex-direction: column; gap: 20px; z-index: 10; align-items: center; text-align: center; color: white; padding: 20px; 
+        }
+
+        .btn {
+            padding: 15px 40px; font-size: 1.1rem; border: none;
+            border-radius: 50px; cursor: pointer; font-weight: bold;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3); background: white;
+            text-align: center; color: black;
+            text-decoration: none;
+        }
+
+        /* Кнопки настроек стиля */
+        .btn-style {
+            padding: 10px 20px; font-size: 0.9rem; margin: 5px;
+        }
+
+        #game-wrapper { display: none; text-align: center; }
+
+        canvas {
+            background: #000; border: 3px solid white;
+            max-width: 90vw; max-height: 40vh;
+        }
+
+        .controls {
+            display: grid; grid-template-columns: repeat(3, 60px);
+            grid-gap: 10px; justify-content: center; margin-top: 15px;
+        }
+
+        .ctrl-btn {
+            width: 60px; height: 60px; background: rgba(255,255,255,0.3);
+            border: 2px solid white; border-radius: 10px;
+            color: white; font-weight: bold; font-size: 20px;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        #win-screen {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9); color: gold;
+            flex-direction: column; justify-content: center; align-items: center;
+            z-index: 100; text-align: center;
+        }
+
         .hidden { opacity: 0; pointer-events: none; }
     </style>
 </head>
-<body id="main-body" onclick="showButton()">
-    <div class="welcome-text" id="main-text">
+<body id="bg-body" class="bg-rainbow" onclick="handleGlobalClick()"> <div id="main-text">
         <h1>Добро пожаловать на рофл сайт</h1>
         <p>(федя нищий кстати)</p>
+        <p style="font-size: 0.8rem; opacity: 0.7;">Нажми куда угодно</p>
     </div>
-    <button id="tg-button" onclick="rickroll(event)">мой тг</button>
+
+    <div id="menu">
+        <a href="https://t.me/dQw4w9WgXcQ" class="btn" onclick="rickroll(event)">мой тг</a> <button class="btn" onclick="checkRules(event)">играть в змейку</button>
+        <button class="btn" style="background-color: #f0f0f0; color: #333;" onclick="showSettings(event)">настройки</button> </div>
+
+    <div id="rules-screen">
+        <h2 style="text-shadow: 2px 2px 5px rgba(0,0,0,0.5);">Для того, чтобы выиграть в змейку нужно собрать 3 яблока.</h2>
+        <p style="font-size: 1.2rem; text-shadow: 2px 2px 5px rgba(0,0,0,0.5);">Желаю удачи!</p>
+        <button class="btn" onclick="startGame(event)">Играть!</button>
+    </div>
+
+    <div id="game-wrapper">
+        <div style="color: white; margin-bottom: 5px; font-weight: bold; text-shadow: 1px 1px 3px black;">Счет: <span id="score">0</span> / 3</div>
+        <canvas id="snakeGame" width="400" height="400"></canvas>
+        <div class="controls">
+            <div></div><div class="ctrl-btn" onclick="setDir('UP')">▲</div><div></div>
+            <div class="ctrl-btn" onclick="setDir('LEFT')">◀</div><div class="ctrl-btn" onclick="setDir('DOWN')">▼</div><div class="ctrl-btn" onclick="setDir('RIGHT')">▶</div>
+        </div>
+    </div>
+
+    <div id="win-screen">
+        <h1 style="font-size: 2.5rem; margin-bottom: 25px; padding: 0 10px;">ФЕДЯ НИЩИЙ УРА!</h1>
+        <button class="btn" onclick="resetToMenu(event)">вернуться в главное меню</button>
+    </div>
+
+    <div id="settings-panel">
+        <h2 style="text-shadow: 2px 2px 5px rgba(0,0,0,0.5);">Настройки фона</h2>
+        <button class="btn btn-style" style="background: white;" onclick="setBg('rainbow', event)">Радужный (Классика)</button>
+        <button class="btn btn-style" style="background: #333; color: white;" onclick="setBg('fedya', event)">Федя</button>
+        <button class="btn" onclick="hideSettings(event)" style="margin-top: 20px; background-color: rgb(255, 100, 100); color: white;">Назад</button>
+    </div>
+
     <script>
-        function showButton() {
-            const text = document.getElementById('main-text');
-            text.classList.add('hidden');
-            setTimeout(() => {
-                const btn = document.getElementById('tg-button');
-                btn.style.display = 'block';
-                document.getElementById('main-body').onclick = null;
-                document.body.style.cursor = 'default';
-            }, 500);
+        let stage = 1;
+        let gameLoop;
+        let d;
+        let rulesSeen = false; 
+        let currentBg = 'rainbow'; // Запоминаем текущий фон
+
+        function handleGlobalClick() {
+            if (stage === 1) {
+                stage = 2;
+                document.getElementById('main-text').classList.add('hidden');
+                setTimeout(() => {
+                    document.getElementById('main-text').style.display = 'none';
+                    document.getElementById('menu').style.display = 'flex';
+                }, 500);
+            }
         }
-        function rickroll(event) {
-            event.stopPropagation();
+
+        function rickroll(e) {
+            e.stopPropagation();
             window.location.href = "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
+        }
+
+        // --- НАСТРОЙКИ (НОВЫЕ ФУНКЦИИ) ---
+
+        function showSettings(e) {
+            e.stopPropagation();
+            document.getElementById('menu').style.display = 'none';
+            document.getElementById('settings-panel').style.display = 'flex';
+        }
+
+        function hideSettings(e) {
+            e.stopPropagation();
+            document.getElementById('settings-panel').style.display = 'none';
+            document.getElementById('menu').style.display = 'flex';
+        }
+
+        // Функция смены фона
+        function setBg(bgType, e) {
+            if(e) e.stopPropagation();
+            const body = document.getElementById('bg-body');
+            
+            // Сбрасываем все классы фонов
+            body.classList.remove('bg-rainbow', 'bg-fedya');
+            
+            // Устанавливаем новый класс и запоминаем выбор
+            if (bgType === 'fedya') {
+                body.classList.add('bg-fedya');
+                currentBg = 'fedya';
+            } else {
+                body.classList.add('bg-rainbow');
+                currentBg = 'rainbow';
+            }
+        }
+
+        // --- ЛОГИКА ЗМЕЙКИ (БЕЗ ИЗМЕНЕНИЙ) ---
+
+        function checkRules(e) {
+            e.stopPropagation();
+            document.getElementById('menu').style.display = 'none';
+            
+            if (rulesSeen) {
+                document.getElementById('game-wrapper').style.display = 'block';
+                initSnake();
+            } else {
+                document.getElementById('rules-screen').style.display = 'flex';
+                rulesSeen = true;
+            }
+        }
+
+        function startGame(e) {
+            e.stopPropagation();
+            document.getElementById('rules-screen').style.display = 'none';
+            document.getElementById('game-wrapper').style.display = 'block';
+            initSnake();
+        }
+
+        function resetToMenu(e) {
+            if(e) e.stopPropagation();
+            document.getElementById('win-screen').style.display = 'none';
+            document.getElementById('game-wrapper').style.display = 'none';
+            document.getElementById('rules-screen').style.display = 'none';
+            document.getElementById('menu').style.display = 'flex';
+            stage = 2; 
+        }
+
+        function setDir(dir) { 
+            if(dir == 'LEFT' && d != 'RIGHT') d = 'LEFT';
+            if(dir == 'UP' && d != 'DOWN') d = 'UP';
+            if(dir == 'RIGHT' && d != 'LEFT') d = 'RIGHT';
+            if(dir == 'DOWN' && d != 'UP') d = 'DOWN';
+        }
+
+        function initSnake() {
+            const canvas = document.getElementById("snakeGame");
+            const ctx = canvas.getContext("2d");
+            const scoreEl = document.getElementById("score");
+            let score = 0;
+            scoreEl.innerText = score;
+            d = undefined; 
+
+            let box = 20;
+            let snake = [{x: 9 * box, y: 10 * box}];
+            let food = { x: Math.floor(Math.random()*19+1)*box, y: Math.floor(Math.random()*19+1)*box };
+            
+            if(gameLoop) clearInterval(gameLoop);
+
+            function draw() {
+                ctx.fillStyle = "black";
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                for(let i=0; i<snake.length; i++) {
+                    ctx.fillStyle = (i==0) ? "#00FF00" : "#008000";
+                    ctx.fillRect(snake[i].x, snake[i].y, box, box);
+                }
+                ctx.fillStyle = "red";
+                ctx.fillRect(food.x, food.y, box, box);
+
+                let sX = snake[0].x;
+                let sY = snake[0].y;
+                if(d == "LEFT") sX -= box;
+                if(d == "UP") sY -= box;
+                if(d == "RIGHT") sX += box;
+                if(d == "DOWN") sY += box;
+
+                if(sX == food.x && sY == food.y) {
+                    score++;
+                    scoreEl.innerText = score;
+                    if(score >= 3) {
+                        clearInterval(gameLoop);
+                        document.getElementById('game-wrapper').style.display = 'none';
+                        document.getElementById('win-screen').style.display = 'flex';
+                        return;
+                    }
+                    food = { x: Math.floor(Math.random()*19+1)*box, y: Math.floor(Math.random()*19+1)*box };
+                } else { snake.pop(); }
+
+                let newHead = {x: sX, y: sY};
+                if(sX < 0 || sX >= canvas.width || sY < 0 || sY >= canvas.height || snake.some(s => s.x === newHead.x && s.y === newHead.y)) {
+                    clearInterval(gameLoop);
+                    alert("Проиграл!");
+                    resetToMenu();
+                }
+                snake.unshift(newHead);
+            }
+            gameLoop = setInterval(draw, 150);
         }
     </script>
 </body>
