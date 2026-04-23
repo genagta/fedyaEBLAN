@@ -21,7 +21,7 @@
         }
 
         body.bg-fedya {
-            background-image: url('IMG_6374.jpeg'); /* Твой Федя на фоне */
+            background-image: url('IMG_6374.jpeg'); 
             background-size: contain; 
             background-position: center top; 
             background-repeat: no-repeat;
@@ -79,11 +79,9 @@
         /* --- СПАРРОУ ЗАЛИПАЛКА --- */
         #sparrow-img {
             width: 300px;
-            max-width: 80vw; /* Чтобы на мобиле не вылезал */
+            max-width: 80vw;
             transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             user-select: none;
-            border: 2px solid white; /* Добавим рамочку, чтобы было видно, где он */
-            background-color: rgba(255,255,255,0.1); /* Легкий фон */
         }
 
         .flipped { transform: rotate(180deg); }
@@ -115,7 +113,7 @@
 
     <div id="sparrow-screen" onclick="flipSparrow(event)">
         <h2 style="margin-top: 10vh;">Нажимай на экран!</h2>
-        <img id="sparrow-img" src="image_6.png" alt="Красный Sparrow">
+        <img id="sparrow-img" src="IMG_6410.jpeg" alt="Красный Sparrow">
         <p>Красный Sparrow — легенда приземлений</p>
         <button class="btn" onclick="backToMenu(event)" style="background: red; color: white;">Назад в меню</button>
     </div>
@@ -169,7 +167,6 @@
             window.location.href = "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
         }
 
-        // --- ЛОГИКА СПАРРОУ ---
         function showSparrow(e) {
             e.stopPropagation();
             document.getElementById('menu').style.display = 'none';
@@ -178,9 +175,7 @@
 
         function flipSparrow(e) {
             e.stopPropagation();
-            // Если мы нажали на кнопку Назад, не переворачиваем
             if (e.target.tagName === 'BUTTON') return; 
-
             sparrowFlipped = !sparrowFlipped;
             const img = document.getElementById('sparrow-img');
             if (sparrowFlipped) {
@@ -196,7 +191,6 @@
             document.getElementById('menu').style.display = 'flex';
         }
 
-        // --- ОСТАЛЬНОЕ ---
         function showSettings(e) {
             e.stopPropagation();
             document.getElementById('menu').style.display = 'none';
