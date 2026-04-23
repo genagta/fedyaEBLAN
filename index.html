@@ -21,7 +21,7 @@
         }
 
         body.bg-fedya {
-            background-image: url('IMG_6374.jpeg'); 
+            background-image: url('IMG_6374.jpeg'); /* Твой Федя на фоне */
             background-size: contain; 
             background-position: center top; 
             background-repeat: no-repeat;
@@ -43,19 +43,19 @@
             user-select: none; pointer-events: none;
         }
 
-        #menu, #rules-screen, #settings-panel { 
-            display: none; flex-direction: column; gap: 20px; z-index: 10; align-items: center; text-align: center; color: white; padding: 20px; 
+        #menu, #rules-screen, #settings-panel, #sparrow-screen { 
+            display: none; flex-direction: column; gap: 15px; z-index: 10; align-items: center; text-align: center; color: white; padding: 20px; 
         }
 
         .btn {
-            padding: 15px 40px; font-size: 1.1rem; border: none;
+            padding: 15px 30px; font-size: 1.1rem; border: none;
             border-radius: 50px; cursor: pointer; font-weight: bold;
             box-shadow: 0 4px 15px rgba(0,0,0,0.3); background: white;
             text-align: center; color: black;
-            text-decoration: none;
+            text-decoration: none; width: 250px;
         }
 
-        .btn-style { padding: 10px 20px; font-size: 0.9rem; margin: 5px; }
+        .btn-style { padding: 10px 20px; font-size: 0.9rem; margin: 5px; width: auto; }
 
         #game-wrapper { display: none; text-align: center; }
 
@@ -75,6 +75,18 @@
             color: white; font-weight: bold; font-size: 20px;
             display: flex; align-items: center; justify-content: center;
         }
+
+        /* --- СПАРРОУ ЗАЛИПАЛКА --- */
+        #sparrow-img {
+            width: 300px;
+            max-width: 80vw; /* Чтобы на мобиле не вылезал */
+            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            user-select: none;
+            border: 2px solid white; /* Добавим рамочку, чтобы было видно, где он */
+            background-color: rgba(255,255,255,0.1); /* Легкий фон */
+        }
+
+        .flipped { transform: rotate(180deg); }
 
         #win-screen {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -97,17 +109,24 @@
     <div id="menu">
         <button class="btn" onclick="rickroll(event)">мой тг</button> 
         <button class="btn" onclick="checkRules(event)">играть в змейку</button>
+        <button class="btn" style="background-color: #ffcc00;" onclick="showSparrow(event)">переворачивать спарроу</button>
         <button class="btn" style="background-color: #f0f0f0; color: #333;" onclick="showSettings(event)">настройки</button> 
     </div>
 
+    <div id="sparrow-screen" onclick="flipSparrow(event)">
+        <h2 style="margin-top: 10vh;">Нажимай на экран!</h2>
+        <img id="sparrow-img" src="image_6.png" alt="Красный Sparrow">
+        <p>Красный Sparrow — легенда приземлений</p>
+        <button class="btn" onclick="backToMenu(event)" style="background: red; color: white;">Назад в меню</button>
+    </div>
+
     <div id="rules-screen">
-        <h2 style="text-shadow: 2px 2px 5px rgba(0,0,0,0.5);">Для того, чтобы выиграть в змейку нужно собрать 3 яблока.</h2>
-        <p style="font-size: 1.2rem; text-shadow: 2px 2px 5px rgba(0,0,0,0.5);">Желаю удачи!</p>
+        <h2>Собери 3 яблока для победы.</h2>
         <button class="btn" onclick="startGame(event)">Играть!</button>
     </div>
 
     <div id="game-wrapper">
-        <div style="color: white; margin-bottom: 5px; font-weight: bold; text-shadow: 1px 1px 3px black;">Счет: <span id="score">0</span> / 3</div>
+        <div style="color: white; margin-bottom: 5px;">Счет: <span id="score">0</span> / 3</div>
         <canvas id="snakeGame" width="400" height="400"></canvas>
         <div class="controls">
             <div></div><div class="ctrl-btn" onclick="setDir('UP')">▲</div><div></div>
@@ -116,15 +135,15 @@
     </div>
 
     <div id="win-screen">
-        <h1 style="font-size: 2.5rem; margin-bottom: 25px; padding: 0 10px;">ФЕДЯ НИЩИЙ УРА!</h1>
-        <button class="btn" onclick="resetToMenu(event)">вернуться в главное меню</button>
+        <h1>ФЕДЯ НИЩИЙ УРА!</h1>
+        <button class="btn" onclick="resetToMenu(event)">в меню</button>
     </div>
 
     <div id="settings-panel">
-        <h2 style="text-shadow: 2px 2px 5px rgba(0,0,0,0.5);">Настройки фона</h2>
-        <button class="btn btn-style" style="background: white;" onclick="setBg('rainbow', event)">Радужный (Классика)</button>
+        <h2>Настройки фона</h2>
+        <button class="btn btn-style" style="background: white;" onclick="setBg('rainbow', event)">Радужный</button>
         <button class="btn btn-style" style="background: #333; color: white;" onclick="setBg('fedya', event)">Федя</button>
-        <button class="btn" onclick="hideSettings(event)" style="margin-top: 20px; background-color: rgb(255, 100, 100); color: white;">Назад</button>
+        <button class="btn" onclick="hideSettings(event)" style="margin-top: 20px; background: red; color: white;">Назад</button>
     </div>
 
     <script>
@@ -132,6 +151,7 @@
         let gameLoop;
         let d;
         let rulesSeen = false; 
+        let sparrowFlipped = false;
 
         function handleGlobalClick() {
             if (stage === 1) {
@@ -144,12 +164,39 @@
             }
         }
 
-        // --- ИСПРАВЛЕННЫЙ РИКРОЛЛ ---
         function rickroll(e) {
             if (e) e.stopPropagation();
             window.location.href = "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
         }
 
+        // --- ЛОГИКА СПАРРОУ ---
+        function showSparrow(e) {
+            e.stopPropagation();
+            document.getElementById('menu').style.display = 'none';
+            document.getElementById('sparrow-screen').style.display = 'flex';
+        }
+
+        function flipSparrow(e) {
+            e.stopPropagation();
+            // Если мы нажали на кнопку Назад, не переворачиваем
+            if (e.target.tagName === 'BUTTON') return; 
+
+            sparrowFlipped = !sparrowFlipped;
+            const img = document.getElementById('sparrow-img');
+            if (sparrowFlipped) {
+                img.classList.add('flipped');
+            } else {
+                img.classList.remove('flipped');
+            }
+        }
+
+        function backToMenu(e) {
+            e.stopPropagation();
+            document.getElementById('sparrow-screen').style.display = 'none';
+            document.getElementById('menu').style.display = 'flex';
+        }
+
+        // --- ОСТАЛЬНОЕ ---
         function showSettings(e) {
             e.stopPropagation();
             document.getElementById('menu').style.display = 'none';
@@ -166,11 +213,8 @@
             if(e) e.stopPropagation();
             const body = document.getElementById('bg-body');
             body.classList.remove('bg-rainbow', 'bg-fedya');
-            if (bgType === 'fedya') {
-                body.classList.add('bg-fedya');
-            } else {
-                body.classList.add('bg-rainbow');
-            }
+            if (bgType === 'fedya') body.classList.add('bg-fedya');
+            else body.classList.add('bg-rainbow');
         }
 
         function checkRules(e) {
