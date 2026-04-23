@@ -53,7 +53,7 @@
             text-decoration: none; width: 250px;
         }
 
-        .btn-yellow { background-color: #ffff00 !important; color: black !important; }
+        .btn-white { background-color: #ffffff !important; color: black !important; }
 
         #game-wrapper { display: none; text-align: center; }
         canvas { background: #000; border: 3px solid white; max-width: 90vw; max-height: 40vh; }
@@ -61,8 +61,25 @@
         .controls { display: grid; grid-template-columns: repeat(3, 60px); grid-gap: 10px; justify-content: center; margin-top: 15px; }
         .ctrl-btn { width: 60px; height: 60px; background: rgba(255,255,255,0.3); border: 2px solid white; border-radius: 10px; color: white; font-weight: bold; font-size: 20px; display: flex; align-items: center; justify-content: center; }
 
+        /* Счетчик комбо */
+        #combo-counter {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #ffff00;
+            text-shadow: 2px 2px 5px black;
+            margin-bottom: 10px;
+            transition: transform 0.1s;
+        }
+
         #sparrow-img { width: 300px; max-width: 80vw; transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); user-select: none; }
         .flipped { transform: rotate(180deg); }
+
+        /* Секретный экран */
+        #secret-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: black; z-index: 1000; justify-content: center;
+        }
+        #secret-screen img { width: 100%; height: 100%; object-fit: contain; }
 
         #win-screen { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); color: gold; flex-direction: column; justify-content: center; align-items: center; z-index: 100; text-align: center; }
         .hidden { opacity: 0; pointer-events: none; }
@@ -79,21 +96,23 @@
     <div id="menu">
         <button class="btn" onclick="rickroll(event)">мой тг</button> 
         <button class="btn" onclick="checkRules(event)">играть в змейку</button>
-        <button class="btn btn-yellow" onclick="showSparrow(event)">переворачивать спарроу</button>
+        <button class="btn btn-white" onclick="showSparrow(event)">переворачивать спарроу</button>
         <button class="btn" style="background-color: #f0f0f0; color: #333;" onclick="showSettings(event)">настройки</button> 
     </div>
 
     <div id="sparrow-screen" onclick="flipSparrow(event)">
-        <h2 style="margin-top: 10vh;">Нажимай на экран!</h2>
+        <div id="combo-counter">0</div>
         <img id="sparrow-img" src="IMG_6410.jpeg" alt="Красный Sparrow">
         <p>Красный Sparrow — легенда приземлений</p>
         <button class="btn" onclick="backToMenu(event)" style="background: red; color: white;">Назад в меню</button>
     </div>
 
     <div id="secret-screen">
-        <h1 style="color: lime; font-size: 3rem;">ЧИТ-КОД АКТИВИРОВАН</h1>
-        <p>Ты настоящий хакер!</p>
-        <button class="btn" onclick="closeSecret(event)">Закрыть</button>
+        <img src="IMG_6174.jpeg" alt="Секретка">
+        <audio id="secret-audio" loop>
+            <source src="1556139147221580238.mov" type="video/mp4">
+        </audio>
+        <button class="btn" onclick="closeSecret(event)" style="position: absolute; bottom: 20px; opacity: 0.6;">Выйти из чилла</button>
     </div>
 
     <div id="rules-screen">
@@ -126,7 +145,7 @@
         let stage = 1;
         let gameLoop, d, rulesSeen = false, sparrowFlipped = false;
 
-        // Переменные для секретного кода
+        // Переменные комбо
         let combo = [];
         let lastClickTime = 0;
         let clickCountInSeries = 0;
@@ -152,54 +171,61 @@
             e.stopPropagation();
             document.getElementById('menu').style.display = 'none';
             document.getElementById('sparrow-screen').style.display = 'flex';
-            // Сбрасываем комбо при входе
-            combo = [];
-            clickCountInSeries = 0;
+            resetComboState();
         }
 
         function flipSparrow(e) {
             e.stopPropagation();
             if (e.target.tagName === 'BUTTON') return; 
 
-            // Обычный переворот
             sparrowFlipped = !sparrowFlipped;
             const img = document.getElementById('sparrow-img');
+            const counterDisp = document.getElementById('combo-counter');
             img.classList.toggle('flipped');
 
-            // Логика комбо
             const now = Date.now();
             
+            // Логика серий кликов
             if (now - lastClickTime > 1500 && lastClickTime !== 0) {
-                // Если пауза больше 1.5 сек, записываем серию и начинаем новую
                 combo.push(clickCountInSeries);
                 clickCountInSeries = 1;
                 checkCombo();
             } else {
                 clickCountInSeries++;
             }
+            
+            counterDisp.innerText = clickCountInSeries;
             lastClickTime = now;
 
-            // Сброс через 3 секунды неактивности, чтобы зафиксировать последнюю цифру
             clearTimeout(comboTimer);
             comboTimer = setTimeout(() => {
                 combo.push(clickCountInSeries);
-                clickCountInSeries = 0;
+                counterDisp.style.color = "#00ff00"; 
+                setTimeout(() => {
+                    counterDisp.innerText = "0";
+                    counterDisp.style.color = "#ffff00";
+                }, 300);
+
                 checkCombo();
-                combo = []; // Очистка после проверки
+                clickCountInSeries = 0;
+                if (combo.length >= 4) combo = []; 
             }, 2000);
         }
 
         function checkCombo() {
             const secret = [1, 4, 8, 8];
-            // Проверяем, совпадает ли наш массив нажатий с секретом
-            if (combo.join(',') === secret.join(',')) {
+            let lastFour = combo.slice(-4);
+            if (lastFour.join(',') === secret.join(',')) {
                 document.getElementById('sparrow-screen').style.display = 'none';
                 document.getElementById('secret-screen').style.display = 'flex';
+                document.getElementById('secret-audio').play();
+                combo = []; 
             }
         }
 
         function closeSecret(e) {
             e.stopPropagation();
+            document.getElementById('secret-audio').pause();
             document.getElementById('secret-screen').style.display = 'none';
             document.getElementById('menu').style.display = 'flex';
         }
@@ -209,6 +235,14 @@
             document.getElementById('sparrow-screen').style.display = 'none';
             document.getElementById('menu').style.display = 'flex';
         }
+
+        function resetComboState() {
+            combo = [];
+            clickCountInSeries = 0;
+            document.getElementById('combo-counter').innerText = "0";
+        }
+
+        /* --- ОСТАЛЬНЫЕ ФУНКЦИИ (Настройки, Змейка) --- */
 
         function showSettings(e) {
             e.stopPropagation();
